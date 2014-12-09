@@ -20,7 +20,6 @@ module Capistrano
       uri = URI.parse("https://#{fetch(:slack_subdomain)}.slack.com/services/hooks/incoming-webhook?token=#{fetch(:slack_token)}")
       rooms = [fetch(:slack_room)].flatten
       rooms.each do |room|
-        puts room
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_PEER
