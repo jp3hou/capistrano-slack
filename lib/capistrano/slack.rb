@@ -53,7 +53,9 @@ module Capistrano
           task :starting do
             return if slack_token.nil?
             announced_deployer = ActiveSupport::Multibyte::Chars.new(fetch(:deployer)).mb_chars.normalize(:kd).gsub(/[^\x00-\x7F]/, '').to_s
-            msg = if fetch(:branch, nil)
+            msg = if current_task.name != :deploy
+                    "#{announced_deployer} is running task #{current_task.fully_qualified_name} on #{fetch(:stage, 'production')}"
+                  elsif fetch(:branch, nil)
                     "#{announced_deployer} is deploying #{slack_application}'s #{branch} to #{fetch(:stage, 'production')}"
                   else
                     "#{announced_deployer} is deploying #{slack_application} to #{fetch(:stage, 'production')}"
@@ -68,7 +70,11 @@ module Capistrano
               announced_deployer = fetch(:deployer)
               start_time = fetch(:start_time)
               elapsed = Time.now.to_i - start_time.to_i
-              msg = "#{announced_deployer} deployed #{slack_application} successfully in #{elapsed} seconds."
+              msg = if current_task.name != :deploy
+                      "#{announced_deployer} ran task #{current_task.fully_qualified_name} in #{elapsed} seconds."
+                    else
+                      "#{announced_deployer} deployed #{slack_application} successfully in #{elapsed} seconds."
+                    end
               slack_connect(msg)
             rescue Faraday::Error::ParsingError
               # FIXME deal with crazy color output instead of rescuing
