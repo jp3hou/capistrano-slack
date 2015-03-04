@@ -54,7 +54,7 @@ module Capistrano
             return if slack_token.nil?
             announced_deployer = ActiveSupport::Multibyte::Chars.new(fetch(:deployer)).mb_chars.normalize(:kd).gsub(/[^\x00-\x7F]/, '').to_s
             msg = if fetch(:branch, nil)
-                    "#{announced_deployer} is deploying #{slack_application}'s #{branch} to #{fetch(:stage, 'production')}"
+                    "#{announced_deployer} is deploying #{slack_application}'s branch #{branch} to #{fetch(:stage, 'production')}"
                   else
                     "#{announced_deployer} is deploying #{slack_application} to #{fetch(:stage, 'production')}"
                   end
@@ -69,7 +69,7 @@ module Capistrano
               start_time = fetch(:start_time)
               elapsed = Time.now.to_i - start_time.to_i
               msg = if fetch(:branch, nil)
-                      "#{announced_deployer} deployed #{slack_application}'s #{branch} to #{fetch(:stage, 'production')} successfully in #{elapsed} seconds"
+                      "#{announced_deployer} deployed #{slack_application}'s branch #{branch} to #{fetch(:stage, 'production')} successfully in #{elapsed} seconds"
                     else
                       "#{announced_deployer} deployed #{slack_application} successfully to #{fetch(:stage, 'production')} in #{elapsed} seconds"
                     end
