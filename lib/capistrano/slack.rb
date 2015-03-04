@@ -9,10 +9,10 @@ module Capistrano
 
     def payload(room, announcement)
       {
-        'channel' => room,
-        'username' => fetch(:slack_username),
-        'text' => announcement,
-        'icon_emoji' => fetch(:slack_emoji)
+       'channel' => room,
+       'username' => fetch(:slack_username),
+       'text' => announcement,
+       'icon_emoji' => fetch(:slack_emoji)
       }.to_json
     end
 
@@ -30,7 +30,7 @@ module Capistrano
     end
 
     def slack_defaults
-      if fetch(:slack_deploy_defaults, true) == true
+      if fetch(:slack_deploy_defaults, true)
         before 'deploy', 'slack:starting'
         before 'deploy:migrations', 'slack:starting'
         after 'deploy', 'slack:finished'
@@ -45,8 +45,8 @@ module Capistrano
 
         set :deployer do
           ENV['GIT_AUTHOR_NAME'] ||
-            (git_user = `git config user.name`.chomp; git_user if !git_user.empty?) ||
-            (require 'etc'; etc_info = Etc.getpwnam(ENV['USER']); etc_info.gecos if etc_info)
+           (git_user = `git config user.name`.chomp; git_user if git_user.present?) ||
+           (require 'etc'; etc_info = Etc.getpwnam(ENV['USER']); etc_info.gecos if etc_info)
         end
 
         namespace :slack do
@@ -68,7 +68,11 @@ module Capistrano
               announced_deployer = fetch(:deployer)
               start_time = fetch(:start_time)
               elapsed = Time.now.to_i - start_time.to_i
-              msg = "#{announced_deployer} deployed #{slack_application} successfully in #{elapsed} seconds."
+              msg = if fetch(:branch, nil)
+                      "#{announced_deployer} deployed #{slack_application}'s #{branch} to #{fetch(:stage, 'production')} successfully in #{elapsed} seconds"
+                    else
+                      "#{announced_deployer} deployed #{slack_application} successfully to #{fetch(:stage, 'production')} in #{elapsed} seconds"
+                    end
               slack_connect(msg)
             rescue Faraday::Error::ParsingError
               # FIXME deal with crazy color output instead of rescuing
