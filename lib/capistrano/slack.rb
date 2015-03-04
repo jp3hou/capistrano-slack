@@ -68,7 +68,11 @@ module Capistrano
               announced_deployer = fetch(:deployer)
               start_time = fetch(:start_time)
               elapsed = Time.now.to_i - start_time.to_i
-              msg = "#{announced_deployer} deployed #{slack_application} successfully in #{elapsed} seconds."
+              msg = if fetch(:branch, nil)
+                      "#{announced_deployer} deployed #{slack_application}'s #{branch} to #{fetch(:stage, 'production')} successfully in #{elapsed} seconds"
+                    else
+                      "#{announced_deployer} deployed #{slack_application} successfully to #{fetch(:stage, 'production')} in #{elapsed} seconds"
+                    end
               slack_connect(msg)
             rescue Faraday::Error::ParsingError
               # FIXME deal with crazy color output instead of rescuing
